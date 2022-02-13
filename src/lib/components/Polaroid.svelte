@@ -1,5 +1,9 @@
+<script lang="ts" context="module">
+	let topIndex = 1;
+</script>
+
 <script lang="ts">
-	import Paper from '@smui/paper';
+	import Paper, { PaperComponentDev } from '@smui/paper';
 	import random from 'lodash/random';
 
 	export let src: string = `http://placekitten.com/${250 + Math.ceil(Math.random() * 10)}/${
@@ -11,17 +15,36 @@
 	export let captionRotation: number = random(-5, 5);
 	export let captionOffset: [number, number] = [random(-5, 5), random(-5, 5)];
 
-	function applyRandomRotation() {
+	let self: HTMLDivElement;
+
+	function onMouseEnter() {
 		imageRotation += random(-5, 5);
+		self.style.zIndex = (topIndex++).toString();
+	}
+
+	let lastPos: { x: number; y: number };
+	function onDragStart({ x, y }: DragEvent) {
+		lastPos = { x, y };
+	}
+	function onDrag({ x, y }: DragEvent) {
+		const offset = { x: x - lastPos.x, y: y - lastPos.y };
+		self.style.transform =
+			`rotate(${imageRotation}deg) ` +
+			`translate(${imageOffset[0] + offset.x}px, ` +
+			`${imageOffset[1] + offset.y}px)`;
+		lastPos = { x, y };
 	}
 </script>
 
 <div
 	class="polaroid"
 	style="transform: rotate({imageRotation}deg) translate({imageOffset[0]}px, {imageOffset[1]}px);"
+	on:dragstart={onDragStart}
+	on:drag={onDrag}
+	bind:this={self}
 >
 	<Paper square class="polaroid" elevation={4} draggable>
-		<figure on:mouseenter={applyRandomRotation}>
+		<figure on:mouseenter={onMouseEnter}>
 			<img {src} alt={caption} />
 			<caption
 				style="transform: rotate({captionRotation}deg) translate({captionOffset[0]}px, {captionOffset[1]}px);"

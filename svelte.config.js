@@ -13,6 +13,9 @@ const config = {
 	preprocess: preprocess({
 		postcss: {
 			plugins: [autoprefixer(), fontMagician()]
+		},
+		scss: {
+			includePaths: ['src/lib/style']
 		}
 	}),
 
